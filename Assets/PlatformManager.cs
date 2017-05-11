@@ -12,6 +12,7 @@ public class PlatformManager : MonoBehaviour
     void Awake()
     {
         Oculus.Platform.Core.Initialize();
+        Oculus.Platform.Entitlements.IsUserEntitledToApplication().OnComplete(Entitled);
         Oculus.Platform.Users.GetLoggedInUser().OnComplete(GetLoggedInUserCallback);
         Oculus.Platform.Request.RunCallbacks();  //avoids race condition with OvrAvatar.cs Start().
         Rooms.CreateAndJoinPrivate(RoomJoinPolicy.Everyone, 2, false).OnComplete(RoomSetup);
@@ -33,6 +34,18 @@ public class PlatformManager : MonoBehaviour
             Debug.Log("My room ID = " + message.GetRoom().ID);
             Room myRoom = message.GetRoom();
             Debug.Log("Total users in room = " + myRoom.Users.Count);
+            
+        }
+    }
+
+    private void Entitled(Message message)
+    {
+        if (!message.IsError)
+        {
+            Debug.Log("This user is entitled to the app now");
+        } else
+        {
+            Debug.Log("Error = " + message.GetError().Message);
         }
     }
 }
