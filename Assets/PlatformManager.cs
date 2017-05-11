@@ -13,17 +13,26 @@ public class PlatformManager : MonoBehaviour
     {
         Oculus.Platform.Core.Initialize();
         Oculus.Platform.Users.GetLoggedInUser().OnComplete(GetLoggedInUserCallback);
-        //Oculus.Platform.Rooms.CreateAndJoinPrivate2(RoomJoinPolicy.Everyone, 2, null);
-        //Oculus.Platform.Matchmaking.Enqueue("EJRoom");
-        //Oculus.Platform.Matchmaking.JoinRoom(Oculus.Platform.Rooms.GetCurrent().RequestID, false);
         Oculus.Platform.Request.RunCallbacks();  //avoids race condition with OvrAvatar.cs Start().
-        
+        Rooms.CreateAndJoinPrivate(RoomJoinPolicy.Everyone, 2, false).OnComplete(RoomSetup);
     }
 
     private void GetLoggedInUserCallback(Message<User> message)
     {
         if (!message.IsError) {
             myAvatar.oculusUserID = message.Data.ID;
+            Debug.Log(message.Data.OculusID);
+        }
+    }
+
+    //Playing around with Oculus Rooms
+    private void RoomSetup(Message<Room> message)
+    {
+        if (!message.IsError)
+        {
+            Debug.Log("My room ID = " + message.GetRoom().ID);
+            Room myRoom = message.GetRoom();
+            Debug.Log("Total users in room = " + myRoom.Users.Count);
         }
     }
 }
