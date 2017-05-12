@@ -8,6 +8,7 @@ public class PlatformManager : MonoBehaviour
 {
 
     public OvrAvatar myAvatar;
+    private ulong roomId;
 
     void Awake()
     {
@@ -32,9 +33,10 @@ public class PlatformManager : MonoBehaviour
         if (!message.IsError)
         {
             Debug.Log("My room ID = " + message.GetRoom().ID);
+            roomId = message.GetRoom().ID;
             Room myRoom = message.GetRoom();
             Debug.Log("Total users in room = " + myRoom.Users.Count);
-            
+            Rooms.GetInvitableUsers().OnComplete(GetPeople);
         }
     }
 
@@ -44,6 +46,19 @@ public class PlatformManager : MonoBehaviour
         {
             Debug.Log("This user is entitled to the app now");
         } else
+        {
+            Debug.Log("Error = " + message.GetError().Message);
+        }
+    }
+
+    private void GetPeople(Message<UserList> message)
+    {
+        if (!message.IsError)
+        {
+            Debug.Log("how many can I invite? " + message.Data[0].OculusID);
+            Rooms.InviteUser(roomId, message.Data[0].InviteToken);
+        }
+        else
         {
             Debug.Log("Error = " + message.GetError().Message);
         }
