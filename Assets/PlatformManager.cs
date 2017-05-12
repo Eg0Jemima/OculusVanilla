@@ -16,7 +16,14 @@ public class PlatformManager : MonoBehaviour
         Oculus.Platform.Entitlements.IsUserEntitledToApplication().OnComplete(Entitled);
         Oculus.Platform.Users.GetLoggedInUser().OnComplete(GetLoggedInUserCallback);
         Oculus.Platform.Request.RunCallbacks();  //avoids race condition with OvrAvatar.cs Start().
-        Rooms.CreateAndJoinPrivate(RoomJoinPolicy.Everyone, 2, false).OnComplete(RoomSetup);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            Rooms.CreateAndJoinPrivate(RoomJoinPolicy.Everyone, 2, false).OnComplete(RoomSetup);
+        }
     }
 
     private void GetLoggedInUserCallback(Message<User> message)
