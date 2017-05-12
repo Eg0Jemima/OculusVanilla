@@ -3,12 +3,13 @@ using Oculus.Avatar;
 using Oculus.Platform;
 using Oculus.Platform.Models;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlatformManager : MonoBehaviour
 {
-
     public OvrAvatar myAvatar;
     private ulong roomId;
+    public Text myText;
 
     void Awake()
     {
@@ -22,7 +23,8 @@ public class PlatformManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            Rooms.CreateAndJoinPrivate(RoomJoinPolicy.Everyone, 2, false).OnComplete(RoomSetup);
+            RoomOptions myRoomOptions = new RoomOptions();
+            Rooms.CreateAndJoinPrivate2(RoomJoinPolicy.Everyone, 2, myRoomOptions).OnComplete(RoomSetup);
         }
     }
 
@@ -41,10 +43,13 @@ public class PlatformManager : MonoBehaviour
         if (!message.IsError)
         {
             Debug.Log("My room ID = " + message.GetRoom().ID);
+            string roomIdString = "My room ID = " + message.GetRoom().ID + "\n";
+            myText.text += roomIdString;
             roomId = message.GetRoom().ID;
             Room myRoom = message.GetRoom();
             Debug.Log("Total users in room = " + myRoom.Users.Count);
-            Rooms.GetInvitableUsers().OnComplete(GetPeople);
+            myText.text += "Total users in room " + myRoom.Users.Count + "\n";
+            Rooms.GetInvitableUsers2().OnComplete(GetPeople);
         }
     }
 
@@ -52,7 +57,33 @@ public class PlatformManager : MonoBehaviour
     {
         if (!message.IsError)
         {
-            Debug.Log("This user is entitled to the app now");
+            Debug.Log("This user is entitled");
+            myText.text += "This user is entitled\n";
+        }
+        else
+        {
+            Debug.Log("Error = " + message.GetError().Message);
+            myText.text += "Error = " + message.GetError().Message;
+        }
+    }
+
+    private void UserJoined(Message message)
+    {
+        if (!message.IsError)
+        {
+            Debug.Log("Joined " + message.GetRoom().ID);
+            Rooms.SetRoomInviteNotificationCallback((Message<string> msg) => {
+                if (msg.IsError)
+                {
+                    // Handle error  
+                }
+                else
+                {
+                    string roomID = msg.GetString();
+                    myText.text += msg.GetUser().ID + " joined room " + msg.GetRoom().ID;
+                }
+            }
+            );
         }
         else
         {
@@ -65,7 +96,8 @@ public class PlatformManager : MonoBehaviour
         if (!message.IsError)
         {
             Debug.Log("how many can I invite? " + message.Data[0].OculusID);
-            Rooms.InviteUser(roomId, message.Data[0].InviteToken);
+            myText.text += "how many can I invite? " + message.Data.Count + ", " + message.Data[0].OculusID + "\n";
+            Rooms.InviteUser(roomId, message.Data[0].InviteToken).OnComplete(UserJoined);
         }
         else
         {
