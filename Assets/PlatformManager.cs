@@ -16,7 +16,8 @@ public class PlatformManager : MonoBehaviour
         Oculus.Platform.Entitlements.IsUserEntitledToApplication().OnComplete(Entitled);
         Oculus.Platform.Users.GetLoggedInUser().OnComplete(GetLoggedInUserCallback);
         Oculus.Platform.Request.RunCallbacks();  //avoids race condition with OvrAvatar.cs Start().
-        Rooms.CreateAndJoinPrivate(RoomJoinPolicy.Everyone, 2, false).OnComplete(RoomSetup);
+        //Rooms.CreateAndJoinPrivate(RoomJoinPolicy.Everyone, 2, false).OnComplete(RoomSetup);
+        Rooms.Join(127250654493430, false).OnComplete(JoinedRoom);
     }
 
     private void GetLoggedInUserCallback(Message<User> message)
@@ -51,6 +52,7 @@ public class PlatformManager : MonoBehaviour
         }
     }
 
+<<<<<<< HEAD
     private void GetPeople(Message<UserList> message)
     {
         if (!message.IsError)
@@ -61,6 +63,16 @@ public class PlatformManager : MonoBehaviour
         else
         {
             Debug.Log("Error = " + message.GetError().Message);
+=======
+    //Playing around with Oculus Rooms
+    private void JoinedRoom(Message<Room> message)
+    {
+        if (!message.IsError)
+        {
+            Debug.Log("My Appplication ID = " + message.GetRoom().ApplicationID);
+            Room myRoom = message.GetRoom();
+            Debug.Log("Total users in room = " + myRoom.Users.Count);
+>>>>>>> 0862be518cebc2c55b1cddd067b685647e746160
         }
     }
 }
